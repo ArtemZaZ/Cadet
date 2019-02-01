@@ -29,12 +29,7 @@ uint16_t servoManip3Max = SERVO_CENTRAL_POSITION;  // максимальное
 
 void motorSetup()   // инициализация моторов
 {
-  pinMode(MOTOR_ENABLE_A_CH, OUTPUT);
-  pinMode(MOTOR_ENABLE_B_CH, OUTPUT);
-  pinMode(MOTOR_PWM_A_CH, OUTPUT);
-  pinMode(MOTOR_PWM_B_CH, OUTPUT);
-  pinMode(MOTOR_PWM_INVERSE_A_CH, OUTPUT);
-  pinMode(MOTOR_PWM_INVERSE_B_CH, OUTPUT);
+  
 }
 
 
@@ -138,7 +133,7 @@ void servoInfoDisplay(char* servoName, uint16_t servoPositionMin, uint16_t servo
 }
 
 
-uint16_t rerangeSpeed(uint16_t mspeed)  // проверка и корректировка скорости
+uint16_t rerangeSpeed(int16_t mspeed)  // проверка и корректировка скорости
 {
   if (mspeed > SPEED_MAX) return SPEED_MAX;
   if (mspeed < SPEED_MIN) return SPEED_MIN;
@@ -147,44 +142,41 @@ uint16_t rerangeSpeed(uint16_t mspeed)  // проверка и корректи�
 
 
 //Запуск двигателей 
-void setSpeedRight(uint16_t mspeed)  // первый двигатель - А
+void setSpeedRight(int16_t mspeed)  // первый двигатель - А, принимает значения от -100 до 100
 {
-  if (mspeed > 0)   // если заданная скорость больше нуля, то задаем Прямой ШИМ без инвертирования
+  static uint16_t pulseLen = MOTOR_ZERO_PULSE;
+  if(mspeed >= 0)
   {
-    analogWrite(MOTOR_PWM_A_CH, 255);
-    digitalWrite(MOTOR_PWM_INVERSE_A_CH, LOW);
+    pulseLen = (uint16_t)((float)(abs(mspeed) / 100.f) * (MOTOR_MAX_PULSE - MOTOR_ZERO_PULSE)) + MOTOR_ZERO_PULSE;
   }
-  else    // если меньше, то инвертируем ШИМ !!!( по идее еще бы и значения инвертировать нужно)
+  else
   {
-    digitalWrite(MOTOR_PWM_INVERSE_A_CH, HIGH);
-    analogWrite(MOTOR_PWM_A_CH, 0);
+    pulseLen = (uint16_t)((float)(abs(mspeed) / 100.f) * (MOTOR_MIN_PULSE - MOTOR_ZERO_PULSE)) + MOTOR_ZERO_PULSE;
   }
-  analogWrite(MOTOR_ENABLE_A_CH, abs(mspeed));    //!!! тут еще мб придется поиграть с заполнением, т.к. сейчас скорость в обратную сторону движения не будет совпадать с прямой
+  pwm.setPWM(SERVO_MOTOR_RIGHT_CH, 0, pulseLen);
 }
 
 
 void setSpeedLeft(int16_t mspeed) // второй двигатель - B
 {
-  if (mspeed > 0)
+  static uint16_t pulseLen = MOTOR_ZERO_PULSE;
+  mspeed = -mspeed;
+  if(mspeed >= 0)
   {
-    digitalWrite(MOTOR_PWM_INVERSE_B_CH, HIGH);
-    analogWrite(MOTOR_PWM_B_CH, 0);
+    pulseLen = (uint16_t)((float)(abs(mspeed) / 100.f) * (MOTOR_MAX_PULSE - MOTOR_ZERO_PULSE)) + MOTOR_ZERO_PULSE;
   }
   else
   {
-    analogWrite(MOTOR_PWM_B_CH, 255);
-    digitalWrite(MOTOR_PWM_INVERSE_B_CH, LOW);
+    pulseLen = (uint16_t)((float)(abs(mspeed) / 100.f) * (MOTOR_MIN_PULSE - MOTOR_ZERO_PULSE)) + MOTOR_ZERO_PULSE;
   }
-  analogWrite(MOTOR_ENABLE_B_CH, abs(mspeed));    //!!! аналогично
+  pwm.setPWM(SERVO_MOTOR_LEFT_CH, 0, pulseLen);
 }
 
 
 void stopMotors()   // остановка двигателей
 {
-  analogWrite(MOTOR_PWM_A_CH, 0);
-  digitalWrite(MOTOR_PWM_INVERSE_A_CH, LOW);
-  digitalWrite(MOTOR_PWM_INVERSE_B_CH, LOW);
-  analogWrite(MOTOR_PWM_B_CH, 0);
+  setSpeedRight(0);
+  setSpeedLeft(0);
 }
 
 
@@ -604,12 +596,10 @@ void loop()
   {
     WORK,   // рабочий режим - ездит, кривляется
     CALIBRATION,  // режим калибровки
-    TIRED,  // если робот устал - низкое напряжение
   } state;
 
   ps2x.read_gamepad(false, 0); // считывание данных с джойстика и установка скорости вибрации !!! (пока так)
   adcDataCounter(&voltage, &current); // обновляем донные с АЦП
-  if (voltage < MIN_MCU_VOLTAGE) state = TIRED;   // если напряжение маленькое
   switch(state)
   {
     case WORK:
@@ -623,20 +613,6 @@ void loop()
       if(m_exit)  state = WORK;
       m_exit = false;
       break;    
-
-    case TIRED:
-      if (voltage > MIN_MCU_VOLTAGE)
-      {
-        state = WORK;  // если напряжение нормальное
-      }
-      else
-      {
-        display.clearDisplay();
-        display.drawBitmap(0, 0,  eyes_difficult, IMAGE_WIDTH, IMAGE_HEIGHT, 1);
-        display.display();
-      }
-      delay(10);
-      break;
   }
   delay(5);
 }

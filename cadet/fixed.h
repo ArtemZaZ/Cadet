@@ -21,13 +21,9 @@
 #define SERVO_CALIBRATE_DELAY 1   // зедержка сервы при калибровке - влияет на скорость при калибровке
 #define SERVO_DELAY 3 // задержка сервы при движении - влияет на скорость в рабочем режиме
 
-// выводы драйвера моторов
-#define MOTOR_ENABLE_A_CH     10  // пин разрешающий работу мотора A
-#define MOTOR_ENABLE_B_CH     9   // пин разрешающий работу мотора B
-#define MOTOR_PWM_A_CH        A2  // канал ШИМа мотора А
-#define MOTOR_PWM_B_CH        A3  // канал ШИМа мотора B
-#define MOTOR_PWM_INVERSE_A_CH   13   // пин инвертирующий ШИМ на канале мотора А
-#define MOTOR_PWM_INVERSE_B_CH   4  // пин инвертирующий ШИМ на канале мотора B
+#define MOTOR_ZERO_PULSE  SERVO_CENTRAL_POSITION
+#define MOTOR_MIN_PULSE   250
+#define MOTOR_MAX_PULSE   500
 
 // выводы джойстика
 #define JOY_DAT_CH  5
