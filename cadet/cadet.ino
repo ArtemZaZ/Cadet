@@ -160,7 +160,6 @@ void setSpeedRight(int16_t mspeed)  // первый двигатель - А, п�
 void setSpeedLeft(int16_t mspeed) // второй двигатель - B
 {
   static uint16_t pulseLen = MOTOR_ZERO_PULSE;
-  mspeed = -mspeed;
   if(mspeed >= 0)
   {
     pulseLen = (uint16_t)((float)(abs(mspeed) / 100.f) * (MOTOR_MAX_PULSE - MOTOR_ZERO_PULSE)) + MOTOR_ZERO_PULSE;
@@ -431,39 +430,41 @@ bool workFSM()    // рабочий режим
              ps2x.Button(PSB_PAD_LEFT) || ps2x.Button(PSB_PAD_RIGHT)))) { state = NOTHING; }
       if (ps2x.ButtonPressed(PSB_R1)) { state = SPEED_UP; }
       if (ps2x.ButtonPressed(PSB_R2)) { state = SPEED_DOWN; }
-      if (ps2x.ButtonPressed(PSB_L1)) { state = GUN_ACTIVATION; }
+      if (ps2x.ButtonPressed(PSB_L2)) { state = GUN_ACTIVATION; }
       if (ps2x.Button(PSB_TRIANGLE)) { state = MANIP1_UP; }
       if (ps2x.Button(PSB_CROSS)) { state = MANIP1_DOWN; }
       if (ps2x.Button(PSB_CIRCLE)) { state = MANIP2_UP; }
       if (ps2x.Button(PSB_SQUARE)) { state = MANIP2_DOWN; }
+      if (ps2x.Button(PSB_CIRCLE) && ps2x.Button(PSB_L1)) { state = MANIP3_UP; }     // опрашиваем схват в конце, т.к. на него отведены 2 кнопки, которые уже используются
+      if (ps2x.Button(PSB_SQUARE) && ps2x.Button(PSB_L1)) { state = MANIP3_DOWN; }      
       if (ps2x.Button(PSB_L3) && ps2x.Button(PSB_R3)) { state = EXIT; }
       return false;
 
     case FORWARD:
       setSpeedRight(motorSpeed);    // задаем скорости бортам моторов
       setSpeedLeft(motorSpeed);
-      displayImage(eyes_up);  
+      //displayImage(eyes_up);  
       state = LEAD;
       return false;
 
     case BACKWARD:
       setSpeedRight(-motorSpeed);
       setSpeedLeft(-motorSpeed);
-      displayImage(eyes_down);  
+      //displayImage(eyes_down);  
       state = LEAD;
       return false;
 
     case LEFT:
       setSpeedRight(motorSpeed);
       setSpeedLeft(-motorSpeed);
-      displayImage(eyes_left);  
+      //displayImage(eyes_left);  
       state = LEAD;
       return false;
 
     case RIGHT:
       setSpeedRight(-motorSpeed);
       setSpeedLeft(motorSpeed);
-      displayImage(eyes_right);  
+      //displayImage(eyes_right);  
       state = LEAD;
       return false;
 
@@ -484,7 +485,7 @@ bool workFSM()    // рабочий режим
 
      case GUN_ACTIVATION:
       gunActivate(0);
-      displayImage(eyes_difficult);  
+      //displayImage(eyes_difficult);  
       state = LEAD;
       return false;
 
@@ -493,7 +494,7 @@ bool workFSM()    // рабочий режим
       if (manip1PulseLen > servoManip1Max) manip1PulseLen = servoManip1Max;
       if (manip1PulseLen < servoManip1Min) manip1PulseLen = servoManip1Min;
       pwm.setPWM(SERVO_MANIP1_CH, 0, manip1PulseLen);
-      displayImage(eyes_difficult);  
+      //displayImage(eyes_difficult);  
       state = LEAD;
       return false;
 
@@ -502,7 +503,7 @@ bool workFSM()    // рабочий режим
       if (manip1PulseLen > servoManip1Max) manip1PulseLen = servoManip1Max;
       if (manip1PulseLen < servoManip1Min) manip1PulseLen = servoManip1Min;
       pwm.setPWM(SERVO_MANIP1_CH, 0, manip1PulseLen);
-      displayImage(eyes_difficult);  
+      //displayImage(eyes_difficult);  
       state = LEAD;
       return false;
 
@@ -511,7 +512,7 @@ bool workFSM()    // рабочий режим
       if (manip2PulseLen > servoManip2Max) manip2PulseLen = servoManip2Max;
       if (manip2PulseLen < servoManip2Min) manip2PulseLen = servoManip2Min;
       pwm.setPWM(SERVO_MANIP2_CH, 0, manip2PulseLen);
-      displayImage(eyes_difficult);  
+      //displayImage(eyes_difficult);  
       state = LEAD;
       return false;
 
@@ -520,7 +521,7 @@ bool workFSM()    // рабочий режим
       if (manip2PulseLen > servoManip2Max) manip2PulseLen = servoManip2Max;
       if (manip2PulseLen < servoManip2Min) manip2PulseLen = servoManip2Min;
       pwm.setPWM(SERVO_MANIP2_CH, 0, manip2PulseLen);
-      displayImage(eyes_difficult);  
+      //displayImage(eyes_difficult);  
       state = LEAD;
       return false;
 
@@ -529,7 +530,7 @@ bool workFSM()    // рабочий режим
       if (manip3PulseLen > servoManip3Max) manip3PulseLen = servoManip3Max;
       if (manip3PulseLen < servoManip3Min) manip3PulseLen = servoManip3Min;
       pwm.setPWM(SERVO_MANIP3_CH, 0, manip3PulseLen);
-      displayImage(eyes_difficult);  
+      //displayImage(eyes_difficult);  
       state = LEAD;
       return false;
 
@@ -538,7 +539,7 @@ bool workFSM()    // рабочий режим
       if (manip3PulseLen > servoManip3Max) manip3PulseLen = servoManip3Max;
       if (manip3PulseLen < servoManip3Min) manip3PulseLen = servoManip3Min;
       pwm.setPWM(SERVO_MANIP3_CH, 0, manip3PulseLen);
-      displayImage(eyes_difficult);  
+      //displayImage(eyes_difficult);  
       state = LEAD;
       return false;
 
@@ -598,7 +599,7 @@ void loop()
     CALIBRATION,  // режим калибровки
   } state;
 
-  ps2x.read_gamepad(false, 0); // считывание данных с джойстика и установка скорости вибрации !!! (пока так)
+  ps2x.read_gamepad(); // считывание данных с джойстика и установка скорости вибрации !!! (пока так)
   adcDataCounter(&voltage, &current); // обновляем донные с АЦП
   switch(state)
   {
@@ -614,6 +615,6 @@ void loop()
       m_exit = false;
       break;    
   }
-  delay(5);
+  delay(10);
 }
 

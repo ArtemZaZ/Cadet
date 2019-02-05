@@ -18,7 +18,7 @@
 
 #define SERVO_CENTRAL_POSITION  350  // центральное положение серв (1500 мкс)
 #define SERVO_FREQ  60  // частота ШИМ (~57Гц)
-#define SERVO_CALIBRATE_DELAY 1   // зедержка сервы при калибровке - влияет на скорость при калибровке
+#define SERVO_CALIBRATE_DELAY 0   // зедержка сервы при калибровке - влияет на скорость при калибровке
 #define SERVO_DELAY 3 // задержка сервы при движении - влияет на скорость в рабочем режиме
 
 #define MOTOR_ZERO_PULSE  SERVO_CENTRAL_POSITION
@@ -61,7 +61,7 @@
 
 // Итерируемы объекты - каналы серв и их имена для режима калибровки - нуль-терминальные строки
 const unsigned char SERVO_ITERATED[5] = {SERVO_GUN_CH, SERVO_MANIP1_CH, SERVO_MANIP2_CH, SERVO_MANIP3_CH, '\0'};
-const char * SERVO_NAMES_ITERATED[5] = {"Gun", "Manipulator 1", "Manipulator 2", "Manipulator 3", '\0'};
+const char * SERVO_NAMES_ITERATED[5] = {"Gun", "Manip 1", "Manip 2", "Manip 3", '\0'};
 const unsigned int EEPROM_ADDR_SERV_MIN[5] = {EEPROM_ADDR_SERV_GUN_MIN, EEPROM_ADDR_SERV_MANIP1_MIN,    // адреса максимальных позиций серв в епроме
                                               EEPROM_ADDR_SERV_MANIP2_MIN, EEPROM_ADDR_SERV_MANIP3_MIN, '\0'};
 const unsigned int EEPROM_ADDR_SERV_MAX[5] = {EEPROM_ADDR_SERV_GUN_MAX, EEPROM_ADDR_SERV_MANIP1_MAX,    // адреса максимальных позиций серв в епроме
