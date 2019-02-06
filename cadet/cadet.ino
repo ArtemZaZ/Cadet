@@ -132,6 +132,27 @@ void servoInfoDisplay(char* servoName, uint16_t servoPositionMin, uint16_t servo
   display.display();    
 }
 
+void powerDisplay(float current, float voltage)
+{
+  static uint16_t count = 0;
+  if(count >= POWER_DISPLAY_MAX_COUNT)
+  {
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    display.println("C: ");
+    display.setCursor(30, 0);
+    display.println(current);
+    display.setCursor(0, 20);
+    display.println("V: ");
+    display.setCursor(30, 20);
+    display.println(voltage);
+    display.display();    
+    count = 0;
+  }
+  count++;
+}
 
 uint16_t rerangeSpeed(int16_t mspeed)  // проверка и корректировка скорости
 {
@@ -607,6 +628,7 @@ void loop()
       m_exit = workFSM();   // крутимся в рабочем режиме, пока не придет флаг о выходе из него - вернется true
       if(m_exit)  state = CALIBRATION;
       m_exit = true;
+      powerDisplay(current, voltage);
       break;
 
     case CALIBRATION:
